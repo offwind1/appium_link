@@ -1,0 +1,879 @@
+var report_json = {{json}}
+var xingneng = {{xinneng}}
+
+var log_dic = {
+    {% for device in log %}
+    "{{device}}":
+    `
+        {% for line in log[device] %}
+            {% if line[0][3] == "E" %}
+                <tr>
+                    <td style="color:red;">{{line[0][0]}}</td>
+                    <td style="color:red;">{{line[0][1]}}</td>
+                    <td style="color:red;">{{line[0][3]}}</td>
+                    <td style="color:red;">{{line[0][4]}}</td>
+                    <td style="color:red;">{{line[0][5]}}</td>
+                </tr>
+            {% elif line[0][3] == "W" %}
+                <tr>
+                    <td style="color:#F2AE43;">{{line[0][0]}}</td>
+                    <td style="color:#F2AE43;">{{line[0][1]}}</td>
+                    <td style="color:#F2AE43;">{{line[0][3]}}</td>
+                    <td style="color:#F2AE43;">{{line[0][4]}}</td>
+                    <td style="color:#F2AE43;">{{line[0][5]}}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td style="color:#58B957;">{{line[0][0]}}</td>
+                    <td style="color:#58B957;">{{line[0][1]}}</td>
+                    <td style="color:#58B957;">{{line[0][3]}}</td>
+                    <td style="color:#58B957;">{{line[0][4]}}</td>
+                    <td style="color:#58B957;">{{line[0][5]}}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+    `,
+    {% endfor%}
+}
+
+$(function () {
+    report_json.device_len = report_json.device_list.length;
+    report_json.device_false_index = 0;
+    report_json.install_false_index = 0;
+    report_json.start_false_index = 0;
+
+    for (let i in report_json.device_list) {
+        //循环设备 device_list
+        let device = report_json.device_list[i];
+
+        //设备的case数量
+        device.case_len = device.case_list.length;
+        //设备 失败的case数量
+        device.case_false_index = 0;
+
+        if (device.install_state && device.install_state === "False") {
+            //记录设备 安装是否成功
+            // report_json.device_false_index++;
+            report_json.install_false_index++;
+            // report_json.start_false_index++;
+            // continue;
+        }
+
+        if (device.start_state === "False") {
+            //记录 设备启动是否成功
+            // report_json.device_false_index++;
+            report_json.start_false_index++;
+            // continue;
+        }
+
+        for (let j in device.case_list) {
+            //循环 case_list
+            let case_ = device.case_list[j];
+            //case的动作数量
+            case_.action_len = case_.action_list.length;
+            //case的动作失败的数量
+            case_.action_false_index = 0;
+
+            for (let l in case_.action_list) {
+                //循环 action_list
+                let action = case_.action_list[l];
+
+                if (action.state === "False") {
+                    case_.action_false_index++;
+                }
+            }
+
+            if (case_.action_false_index > 0) {
+                device.case_false_index++;
+            }
+        }
+
+        if (device.case_false_index > 0) {
+            report_json.device_false_index++;
+        }
+    }
+});
+
+function get_device_list_name() {
+    let device_list = [];
+    for (let i in report_json.device_list) {
+        let device = report_json.device_list[i];
+        device_list.push(device.device_name);
+    }
+    return device_list;
+}
+
+function get_apk_info() {
+    //获取 apk信息
+    let r = report_json;
+    return [r.apklabel, r.version, r.device_len, r.file_size, r.test_time];
+}
+
+function get_main_test_info() {
+    //获取 测试结果
+    //[通过数，失败数，安装失败数，安装失败比例，启动失败数，启动失败比例]
+    let [ss, sf] = get_devices_state();
+    let [inf, ins] = get_device_install_state();
+    let [stf, sts] = get_device_start_state();
+    return [ss, sf, inf, ins, stf, sts];
+}
+
+function get_devices_state() {
+    /*
+    获取设备执行状态
+    返回设备通过数和失败数
+    [success_num, false_num]
+     */
+    let false_num = report_json.device_false_index;
+    let success = report_json.device_len - false_num;
+    // let sp = success / report_json.device_len * 150;
+    // let fp = false_num / report_json.device_len * 150;
+    return [success, false_num]
+}
+
+function get_device_install_state() {
+    /*
+    获取安装状态
+    返回设备安装失败数，和比例
+    [false_num, 比例]
+     */
+    let false_num = report_json.install_false_index;
+    let l = report_json.device_list.length
+    return [false_num, l-false_num]
+}
+
+function get_device_start_state() {
+    /*
+    获取启动状态
+    返回设备启动失败数，和比例
+    [false_num, 比例]
+     */
+    let false_num = report_json.start_false_index;
+    let l = report_json.device_list.length;
+
+    console.log(report_json);
+
+    return [false_num, l-false_num]
+}
+
+function get_device(device_name) {
+    for (let i in report_json.device_list) {
+        let device = report_json.device_list[i];
+
+        if (device.device_name === device_name) {
+            return device;
+        }
+    }
+}
+
+function get_state(obj) {
+    let temp;
+    if (obj) {
+        if (obj === "True") {
+            temp = "√";
+        } else if (obj === "False") {
+            temp = "×";
+        } else {
+            temp = "-";
+        }
+    } else {
+        temp = "-";
+    }
+    return temp;
+}
+
+function get_index_to_state(index) {
+    let temp;
+    if (index > 0) {
+        temp = "×";
+    } else {
+        temp = "√";
+    }
+    return temp;
+}
+
+function get_device_info(device_name) {
+    let device = get_device(device_name);
+    let ins, sts, rus;
+
+    ins = get_state(device.install_state);
+    sts = get_state(device.start_state);
+    rus = get_index_to_state(device.case_false_index);
+
+    return [
+        device.device_name,
+        device.device_type,
+        device.device_version,
+        device.device_sdk_version,
+        ins, sts, rus,
+        device.case_len,
+        device.case_false_index
+    ]
+}
+
+function get_device_info_(device_name) {
+    let device = get_device(device_name);
+    return [
+        device.device_name,
+        device.device_type,
+        device.device_version,
+        device.device_sdk_version
+    ]
+}
+
+function get_终端详情_安装结果(device_name) {
+    let device = get_device(device_name);
+    let dis = device.install_state;
+    let state, time;
+    if (dis) {
+        if (dis === "True") {
+            state = true;
+            time = device.install_time;
+        } else if (dis === "False") {
+            state = false;
+            time = device.install_time;
+        }
+    } else {
+        state = true;
+        time = "----";
+    }
+
+    return [state, keepTwoDecimal(time)];
+}
+
+function get_终端详情_启动结果(device_name) {
+    let device = get_device(device_name);
+    let dis = device.start_state;
+    let state, time;
+    if (dis) {
+        if (dis === "True") {
+            state = true;
+            time = device.start_time;
+        } else if (dis === "False") {
+            state = false;
+            time = device.start_time;
+        }
+    } else {
+        state = true;
+        time = "----";
+    }
+    return [state, time];
+}
+
+function get_终端详情_运行结果(device_name) {
+    let device = get_device(device_name);
+    let num = device.case_len;
+    let fal = device.case_false_index;
+
+    return [num - fal, fal];
+}
+
+function show_终端详情_测试结果_安装(device_name) {
+    let [in_s, in_t] = get_终端详情_安装结果(device_name);
+    if (in_s) {
+        $("#stepInstall").attr("class", "span_color_g")
+    } else {
+        $("#stepInstall").attr("class", "span_color_r")
+    }
+    $("#installTime").text("耗时：" + in_t + "秒");
+}
+
+function show_终端详情_测试结果_启动(device_name) {
+    let [in_s, in_t] = get_终端详情_启动结果(device_name);
+    if (in_s) {
+        $("#stepStartup").attr("class", "span_color_g")
+    } else {
+        $("#stepStartup").attr("class", "span_color_r")
+    }
+    $("#startupTime").text("耗时：" + in_t + "秒");
+}
+
+function show_终端详情_测试结果_运行(device_name) {
+    let [succ, fal] = get_终端详情_运行结果(device_name);
+    if (fal === 0) {
+        $("#stepTraversal").attr("class", "span_color_g")
+    } else {
+        $("#stepTraversal").attr("class", "span_color_r")
+    }
+    $("#traversalTime").html("通过:<b>" + succ + "</b> | 失败:<b>" + fal + "</b>");
+}
+
+function show_终端详情_用例列表(device_name) {
+    let device = get_device(device_name);
+    $("#d_c_l").html("");
+
+    for (let index in device.case_list) {
+        let case_ = device.case_list[index];
+        let state, file_name, pass_index, false_index;
+
+        file_name = case_.file_name;
+        false_index = case_.action_false_index;
+        pass_index = case_.action_len;
+
+        if (false_index > 0) {
+            state = "False";
+        } else {
+            state = "True";
+        }
+
+        $("#d_c_l").append(
+            `
+        <tr class="${state}">
+            <td>
+                <a onclick="show_用例详情('${device_name}', ${index})">
+                    ${file_name}
+                </a>
+            </td>
+            <td>${pass_index}</td>
+            <td>${state}</td>
+        </tr>
+        `
+        );
+
+    }
+
+}
+
+function show_终端详情_log(device_name){
+    $("#logList").html("");
+    $("#logList").append(log_dic[device_name])
+}
+
+var cpu_chart =null, mem_chart = null;
+
+function show_终端详情_性能信息(device_name) {
+    let xn = xingneng[device_name];
+    let cpu_l =[], cpu_ld=[];
+
+    for (let i in xn.cpu_list){
+        let [a, b] = xn.cpu_list[i];
+        cpu_ld.push(a);
+        cpu_l.push(b);
+    }
+
+    if(cpu_chart){
+        cpu_chart.destroy()
+    }
+
+    cpu_chart = new Chart(document.getElementById("device_xn_test"), {
+        "type": "line",
+        "data": {
+            "labels": cpu_ld,
+            "datasets": [{
+                "label": "Cpu 占有率",
+                "data": cpu_l,
+                "fill": false,
+                "borderColor": "rgb(75, 192, 192)",
+                "lineTension": 0.1
+            }]
+        },
+        "options": {
+            "scales": {
+                "yAxes": 
+                [{
+                    ticks: {
+                        // Include a dollar sign in the ticks
+                        callback: function(value, index, values) {
+                            return '' + value +"%";
+                        }
+                    }
+                }]
+            }
+        }
+    });
+
+
+    let mem_l = [], mem_ld=[];
+    for(let i in xn.mem_list){
+        let [a, [b, c]] = xn.mem_list[i];
+        mem_l.push(c/1000);
+        mem_ld.push(a);
+    }
+
+
+    if(mem_chart){
+        mem_chart.destroy()
+    }
+    mem_chart = new Chart(document.getElementById("device_xn_test2"), {
+        "type": "line",
+        "data": {
+            "labels": mem_ld,
+            "datasets": [
+            {
+                "label": "内存使用",
+                "data": mem_l,
+                "fill": false,
+                "borderColor": "rgb(101,152,66)",//"rgb(75, 192, 192)",
+                "lineTension": 0.1
+            }]
+        },
+        "options": {
+            "scales": {
+                "yAxes": 
+                [{
+                    ticks: {
+                        // Include a dollar sign in the ticks
+                        callback: function(value, index, values) {
+                            return '' + value +"mb";
+                        }
+                    }
+                }]
+            }
+        }
+    });
+}
+
+function get_设备平均性能(device_name) {
+    let xn = xingneng[device_name];
+
+    let mem_max= 0, mem_;
+    for(let i in xn.mem_list){
+        let [a, [b, c]] = xn.mem_list[i];
+        mem_max += c;
+    }
+
+    mem_ = mem_max / xn.mem_list.length;
+
+    let cpu_max = 0, cpu_;
+    for (let i in xn.cpu_list){
+        let [a, b] = xn.cpu_list[i];
+        cpu_max += b;
+    }
+    cpu_ = cpu_max / xn.cpu_list.length;
+    
+    return [keepTwoDecimal(mem_/1000), keepTwoDecimal(cpu_)];
+}
+
+function keepTwoDecimal(num) {
+    if(num === "----"){
+        return num;
+    }
+    
+     var result = parseFloat(num);
+     if (isNaN(result)) {
+     alert('传递参数错误，请检查！');
+     return false;
+     }
+     result = Math.round(num * 100) / 100;
+     return result;
+}
+
+function 终端详情_设备列表() {
+    let device_list = report_json.device_list;
+    let suc = 0,
+        fal = 0;
+
+    for (let i in device_list) {
+        let device = device_list[i];
+
+        if (device.install_state === "False" || device.start_state === "False" || device.case_false_index > 0) {
+            fal++;
+            $("#failed_device_list").append(
+                `
+            <ul id="failDeviceList" class="small_list" style="max-height: 260px; overflow-y: auto;">
+                <li style="cursor:pointer;" onclick="show_设备信息_('${device.device_name}')">${device.device_name}</li>
+            </ul>
+            `
+            );
+        } else {
+            suc++;
+            $("#success_device_list").append(
+                `
+            <ul id="passDeviceList" class="small_list" style="max-height: 260px; overflow-y: auto;">
+                <li style="cursor:pointer;" onclick="show_设备信息_('${device.device_name}')">${device.device_name}</li>
+            </ul>
+            `
+            );
+        }
+    }
+
+    $("#failDeviceCount").text("(" + fal + ")");
+    $("#passDeviceCount").text("(" + suc + ")");
+}
+
+function show_性能详情_性能概括(){
+    性能概括_安装时间()
+    性能概括_启动时间()
+    性能概括_CPU_and_MEM()
+}
+
+function 性能概括_CPU_and_MEM(){
+    let cpu_list = [];
+    let mem_list = [];
+
+    for(let key in xingneng){
+        let [mem, cpu] = get_设备平均性能(key);
+
+        cpu_list.push([cpu, key])
+        mem_list.push([mem, key])
+    }
+    性能概括_CPU占用(cpu_list);
+    性能概括_MEM占用(mem_list);
+
+    console.log(cpu_list);
+    console.log(mem_list);
+}
+
+function 性能概括_CPU占用(list){
+    let a = $("#xinneng_details_section .performance_box .ul_box1");
+    let box = a.get(2);
+
+    let b = $(box).find("li p");
+    let c = $(box).find("li span");
+
+    let sum = 0, max = [0,"-"], min = [0, "-"];
+    for(let i in list){
+        let dev = list[i];
+
+        sum += dev[0]
+
+        if(dev[0] > max[0]){
+            max = dev
+        }
+        
+        if(min[0] == 0){
+            min = dev
+        }else{
+            if(dev[0] < min[0]){
+                min = dev
+            }
+        }
+    }
+
+    sum = sum / list.length;
+
+    $(b[0]).text(keepTwoDecimal(sum)+"%");
+    $(c[1]).text(min[1]);
+    $(c[2]).text(keepTwoDecimal(min[0])+"%");
+
+    $(c[4]).text(max[1]);
+    $(c[5]).text(keepTwoDecimal(max[0])+"%");
+}
+
+function 性能概括_MEM占用(list){
+    let a = $("#xinneng_details_section .performance_box .ul_box1");
+    let box = a.get(3);
+
+    let b = $(box).find("li p");
+    let c = $(box).find("li span");
+
+    let sum = 0, max = [0,"-"], min = [0, "-"];
+    for(let i in list){
+        let dev = list[i];
+
+        sum += dev[0]
+
+        if(dev[0] > max[0]){
+            max = dev
+        }
+        
+        if(min[0] == 0){
+            min = dev
+        }else{
+            if(dev[0] < min[0]){
+                min = dev
+            }
+        }
+    }
+    sum = sum / list.length;
+
+    $(b[0]).text(keepTwoDecimal(sum)+"MB");
+    $(c[1]).text(min[1]);
+    $(c[2]).text(keepTwoDecimal(min[0])+"MB");
+
+    $(c[4]).text(max[1]);
+    $(c[5]).text(keepTwoDecimal(max[0])+"MB");
+}
+
+function 性能概括_启动时间(){
+    let a = $("#xinneng_details_section .performance_box .ul_box1");
+    let box = a.get(1);
+
+    let b = $(box).find("li p");
+    let c = $(box).find("li span");
+
+    let sum = 0, max = [0,"-"], min = [0, "-"];
+    for(let i in report_json.device_list){
+        let device = report_json.device_list[i];
+        
+        if (device.start_time){
+            let ins_time = parseFloat(device.start_time)
+
+            sum += ins_time
+
+            if(ins_time > max[0]){
+                max = [ins_time, device.device_name]
+            }
+            
+            if(min[0] == 0){
+                min = [ins_time, device.device_name]
+            }else{
+                if(ins_time < min[0]){
+                    min = [ins_time, device.device_name]
+                }
+            }
+        }
+    }
+
+    sum = sum / report_json.device_list.length;
+
+    $(b[0]).text(keepTwoDecimal(sum)+"s");
+    $(c[1]).text(min[1]);
+    $(c[2]).text(keepTwoDecimal(min[0])+"s");
+
+    $(c[4]).text(max[1]);
+    $(c[5]).text(keepTwoDecimal(max[0])+"s");
+
+}
+
+function 性能概括_安装时间(){
+    let a = $("#xinneng_details_section .performance_box .ul_box1");
+    let box = a.get(0);
+
+    let b = $(box).find("li p");
+    let c = $(box).find("li span");
+
+    
+    let sum = 0, max = [0,"-"], min = [0, "-"];
+    for(let i in report_json.device_list){
+        let device = report_json.device_list[i];
+        
+        if (device.install_time){
+            let ins_time = parseFloat(device.install_time)
+
+            sum += ins_time
+
+            if(ins_time > max[0]){
+                max = [ins_time, device.device_name]
+            }
+            
+            if(min[0] == 0){
+                min = [ins_time, device.device_name]
+            }else{
+                if(ins_time < min[0]){
+                    min = [ins_time, device.device_name]
+                }
+            }
+
+        }
+    }
+
+    sum = sum / report_json.device_list.length;
+
+    $(b[0]).text(keepTwoDecimal(sum)+"s");
+    $(c[1]).text(min[1]);
+    $(c[2]).text(keepTwoDecimal(min[0])+"s");
+
+    $(c[4]).text(max[1]);
+    $(c[5]).text(keepTwoDecimal(max[0])+"s");
+}
+
+function show_性能详情_终端数据(){
+    for(let i in report_json.device_list){
+        let device = report_json.device_list[i];
+        let device_name = device.device_name;
+        let [mem_, cpu_] = get_设备平均性能(device_name);
+        let ins_t, sta_t;
+
+        if(device.install_time){
+            ins_t = device.install_time;
+        }else{
+            ins_t = "-";
+        }
+
+        if(device.start_time){
+            sta_t = device.start_time;
+        }else{
+            sta_t = "-";
+        }
+
+        $("#pagination_data").append(`
+        <tr>
+            <td>${device_name}</td>
+            <td>${device.device_type}</td>
+            <td>${ins_t}</td>
+            <td>${sta_t}</td>
+            <td>${cpu_}</td>
+            <td>${mem_}</td>
+        </tr>
+        `);
+
+    }
+}
+
+function get_first_device_name() {
+    return report_json.device_list[0].device_name;
+}
+
+function show_用例列表(device_name) {
+    let device = get_device(device_name);
+    $("#action_device_list").html("");
+    let dn = $(
+        `
+        <li class="result_list_box">
+            <p>
+                <b>${device_name}</b>
+            </p>
+        </li>
+    `
+    );
+
+    for (let i in device.case_list) {
+        let c_ = device.case_list[i];
+        let state = "True";
+
+        if (c_.action_false_index > 0) {
+            state = "False";
+        }
+
+        dn.append(
+            `
+        <ul class="small_list ${state}" style="max-height: 260px; overflow-y: auto;">
+            <li style="cursor:pointer;" onclick="show_用例列表_操作列表('${device_name}', ${i})">${c_.file_name}</li>
+        </ul>
+        `
+        )
+    }
+    $("#action_device_list").append(dn);
+}
+
+function get_case(device_name, index) {
+    let device = get_device(device_name);
+    return device.case_list[index]
+};
+
+function show_用例列表_操作列表(device_name, index) {
+    let cas = get_case(device_name, index);
+
+    $("#action_list").html("");
+    $("#action_device_title").html(`
+    <tr>
+        <td>${device_name}</td>
+        <td>${cas.file_name}</td>
+    </tr>
+    `);
+
+    for (let i in cas.action_list) {
+        let action = cas.action_list[i];
+
+        $("#action_list").append(
+            `
+        <ul class="small_list ${action.state}" style="max-height: 260px; overflow-y: auto;">
+            <li style="cursor:pointer;" onclick="show_用例列表_操作列表_动作详情('${device_name}', ${index}, ${i})">
+                <span>${action.title}</span></li>
+        </ul>
+        `
+        );
+    }
+}
+
+function get_action(device_name, index, i) {
+    let cas = get_case(device_name, index);
+    return cas.action_list[i];
+};
+
+function clear_board() {
+    // $("#page_board").html("");
+    // $("#normal_board").html("");
+    // $("#error_board").html("");
+    // $("#title_board").html("");
+    $("#action_board").html("");
+}
+
+function gh(a, v) {
+    $("#action_board").append(`<li>
+        <span>${a}: ${from_state(v)}</span>
+    </li>`)
+};
+
+function g(a, v) {
+    $("#action_board").append(`<li>
+        <span>${a}: ${v}</span>
+    </li>`)
+};
+
+function gi(v) {
+    $("#action_board").append(`<li>
+                <img class="screenshot" src="${v}" alt="${v}">
+            </li>`);
+}
+
+function from_state(v) {
+    if (v === "0") {
+        return "否"
+    } else if (v === "2") {
+        return "是"
+    } else {
+        return v;
+    }
+}
+
+function show_用例列表_操作列表_动作详情(device_name, index, i) {
+    let action = get_action(device_name, index, i);
+    clear_board();
+
+    if (action.title) {
+        gh("标题", action.title);
+    }
+    if (action.name) {
+        gh("对象", action.name);
+    }
+    if(action.page){
+        gh("界面",action.page)
+    }
+    if (action.value && action.type) {
+        gh(`控件${action.type}`, action.value);
+    } else if (action.value) {
+        gh(`值`, action.value);
+    }
+    if(action.select !== ""){
+        g("控件位置",action.select)
+    }
+    if(action.send_key){
+        gh("发送文本",action.send_key)
+    }
+    if (action.state) {
+        gh(`状态`, action.state);
+    }
+    if (action.message) {
+        gh(`信息`, action.message);
+    }
+    
+    if(action.user_send){
+        gh(`是否模拟用户输入`, action.user_send);
+    }
+    if(action.is_long_press){
+        gh(`是否长按`, action.is_long_press);
+        if(action.is_long_press==="2"){
+            gh(`长按时间`, action.long_press_time);
+        }
+    }
+
+    if (action.screenshot) {
+        gi(action.screenshot);
+    }
+}
+
+
+
+$(function () {
+    var percent = $('#action_board').css('top');
+    var str = percent.replace("%", "");
+    navH = str = str / 100 * $(window).height();
+    $(window).scroll(function () {
+        //获取滚动条的滑动距离
+        var scroH = $(this).scrollTop();
+        //滚动条的滑动距离大于等于定位元素距离浏览器顶部的距离，就固定，反之就不固定
+        if (scroH >= navH) {
+            $("#action_board").css({
+                "position": "fixed",
+                "top": "0%"
+            });
+        } else if (scroH < navH) {
+            $("#action_board").css({
+                "position": "absolute",
+                "top": "36.5%"
+            });
+        }
+    })
+});

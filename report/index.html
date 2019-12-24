@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <title>test</title>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/Compatibility_overview_2.0.css">
+    <script src="js/jquery-1.7.1.min.js"></script>
+    <script src="js/jquery-ui-1.8.17.min.js"></script>
+    <script src="js/styler.js"></script>
+    <script src="js/jquery.tipTip.js"></script>
+    <script src="js/colorpicker.js"></script>
+    <script src="js/sticky.full.js"></script>
+    <script src="js/global.js"></script>
+    <script src="js/flot/jquery.flot.min.js"></script>
+    <script src="js/flot/jquery.flot.resize.min.js"></script>
+    <script src="js/flot/jquery.flot.pie.min.js"></script>
+    <script src="js/jquery.dataTables.min.js"></script>
+    <script src="js/echarts_410rc2.min.js"></script>
+    <script src="js/Chart.js"></script>
+    <script src="js/Chart.min.js"></script>
+    <script type="text/javascript" src="test.js"></script>
+</head>
+
+<body>
+    <div class="page-body-other">
+        <!-- 被渲染的body -->
+        <div class="wrapper_main">
+
+
+            <!-- 应用信息 -->
+            <div class="Application_information">
+                <div class="information_header">
+                    <div class="head_title">
+                        <b>应用信息</b>
+
+                    </div>
+                </div>
+                <div class="information_box">
+                    <ul class="information_box_app_ico">
+                        <li><img src="img/android.png" alt=""></li>
+                    </ul>
+                    <ul class="information_box_name">
+                        <li><b>应用名称: </b><span id="apk_label"></span></li>
+                        <li><b>测试类型: </b><span>UI自动化测试</span></li>
+                    </ul>
+                    <ul class="information_box_name">
+                        <li><b>应用版本：</b><span id="apk_version"></span></li>
+                        <li><b>测试终端数: </b><span id="device_num"></span></li>
+                    </ul>
+                    <ul class="information_box_name">
+                        <li><b>应用大小：</b><span id="file_size"></span></li>
+                        <li><b>提测时间：</b><span id="test_time"></span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 菜单切换-->
+            <div class="Application_cont">
+
+                <!-- 测试概括 -->
+                <div class="Application_menu">
+                    <ul id="menu_title">
+                        <li id="report_summary" class="on">测试概况</li>
+                        <li id="device_detail" class="">终端详情</li>
+                        <li id="case_details" class="">用例详情</li>
+                        <li id="xinneng_details" class="">性能详情</li>
+                    </ul>
+
+                    <div id="Test_generalizations">
+                        <!-- 测试概括 -->
+                        <section class="information_generalization" id="report_summary_section" style="display: block;">
+                            <!-- 测试结果 -->
+                            <div class="test_result">
+                                <p><b>测试结果</b></p>
+                                <!-- <div class="test_model_lt ">
+                                    <h6><span>|</span><b>设备执行状态</b></h6>
+                                    <div class="test_model_num">
+                                        <span class="resule">通过数</span>
+                                        <div class="resule_box">
+                                            <div class="progress_bar" id="ssp" style="width: 0px"></div>
+                                        </div>
+                                        <span class="percentage" id="ss">0</span>
+                                    </div>
+                                    <div class="test_model_num test_model_num2">
+                                        <span class="resule">失败数</span>
+                                        <div class="resule_box">
+                                            <div class="progress_bar" id="ffp" style="width: 0px"></div>
+                                        </div>
+                                        <span class="percentage" id="sf">0</span>
+                                    </div>
+                                </div> -->
+
+                                <div class="test_model_lt">
+                                    <h6><span>|</span><b>设备执行状态</b></h6>
+                                    <canvas id="test_test" width="400" height="200"></canvas>
+                                </div>
+
+                                <div class="test_model_lt">
+                                    <h6><span>|</span><b>安装状态</b></h6>
+                                    <canvas id="test_test2" width="400" height="200"></canvas>
+                                </div>
+
+                                <div class="test_model_lt">
+                                    <h6><span>|</span><b>启动状态</b></h6>
+                                    <canvas id="test_test3" width="400" height="200"></canvas>
+                                </div>
+
+                                <!-- <div class="test_model_lt test_model_rt">
+                                    <h6><span>|</span><b>通过率</b></h6>
+                                    <div class="test_model_num">
+                                        <span class="resule">安装失败</span>
+                                        <div class="resule_box">
+                                            <div class="progress_bar" id="inp" style="width: 19.995px"></div>
+                                        </div>
+                                        <span class="percentage" id="inf">13.33%</span>
+                                    </div>
+                                    <div class="test_model_num test_model_num2">
+                                        <span class="resule">启动失败</span>
+                                        <div class="resule_box">
+                                            <div class="progress_bar" id="stp" style="width: 3.33px"></div>
+                                        </div>
+                                        <span class="percentage" id="stf">2.22%</span>
+                                    </div>
+                                </div> -->
+
+                            </div>
+
+                            <!-- 测试终端列表 -->
+                            <div class="Test_list" id="test_device_list">
+                                <!-- style="margin-top: 336px;"> -->
+
+                                <!-- 测试终端列表 -->
+                                <p><b>测试终端列表</b></p>
+                                <div class="list_name screening">
+                                    <!-- 设备列表 <-->
+                                    <table class="table table-condensed">
+                                        <thead>
+                                            <tr style="background:#F4F6FA;">
+                                                <th style="padding-left:14px">设备名称</th>
+                                                <th>型号</th>
+                                                <th>版本</th>
+                                                <th>sdk版本</th>
+                                                <th>安装</th>
+                                                <th>启动</th>
+                                                <th>运行</th>
+                                                <th>执行用例数</th>
+                                                <th>用例失败数量</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="device_list">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+
+
+                        <section class="information_details" id="device_detail_section" style="display: none;">
+                            <!-- 左半部分菜单栏 -->
+                            <div class="test_result_lt">
+                                <h6><b>设备列表</b></h6>
+                                <ul class="result_list navgation">
+                                    <li class="result_list_box" id="failed_device_list">
+                                        <p>
+                                            <b>失败</b>
+                                            <span class="error" id="failDeviceCount">(1)</span>
+                                        </p>
+                                        <!-- <ul id="failDeviceList" class="small_list" style="max-height: 260px; overflow-y: auto;">
+                                            <li style="cursor:pointer;" onclick="showDeviceDetail('SWEYUWLZAAROQCUK')">SWEYUWLZAAROQCUK</li>
+                                        </ul> -->
+                                    </li>
+                                    <li class="result_list_box" id="success_device_list">
+                                        <p>
+                                            <b>通过</b>
+                                            <span class="success" id="passDeviceCount">(1)</span>
+                                        </p>
+                                        <!-- <ul id="passDeviceList" class="small_list" style="max-height: 260px; overflow-y: auto;">
+                                            <li style="cursor:pointer;" onclick="showDeviceDetail('ONYLUWLZAAROQCUK')">ONYLUWLZAAROQCUK</li>
+                                        </ul> -->
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- 右半部分 -->
+                            <!-- 设备信息 -->
+                            <div class="test_result_rt">
+                                <div class="test_result_main" id="device_info">
+                                    <p style="height:58px;line-height:58px;">
+                                        <b>设备信息</b>
+                                    </p>
+                                    <table class="table table-condensed result_table">
+                                        <thead>
+                                            <tr style="background:#E9EFF4;">
+                                                <th>设备名</th>
+                                                <th>系统</th>
+                                                <th>型号</th>
+                                                <th>版本</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="detailDevice">
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <table class="table table-condensed">
+                                        <tbody>
+                                            <tr>
+                                                <td><span>1</span><span id="stepInstall"><b>安装</b></span><span>————</span></td>
+                                                <td><span>2</span><span id="stepStartup"><b>启动</b></span><span>—————</span></td>
+                                                <td><span>3</span><span id="stepTraversal"><b>运行用例</b></span><span>—————</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td id="installTime">耗时：10秒</td>
+                                                <td id="startupTime">耗时：462毫秒</td>
+                                                <td id="traversalTime">通过:<b>1</b> | 失败:<b>2</b></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <ul id="Equipment_information_list" class="tabs">
+                                        <li class="active" id="deviceSummary"><a href="#tab1">用例列表</a></li>
+                                        <li id="deviceTraversal" class=""><a href="#tab2">性能显示</a></li>
+                                        <li id="logtab" class=""><a href="#tab3">log</a></li>
+                                    </ul>
+                                    <!-- 测试终端列表 -->
+                                    <div id="device_show">
+                                        <div class="Test_list" id="test_device_list" style="display: block;">
+                                            <!-- style="margin-top: 336px;"> -->
+                                            <!-- 测试终端列表 -->
+                                            <p><b>用例列表</b></p>
+                                            <div class="list_name screening">
+                                                <!-- 设备列表 <-->
+                                                <table class="table table-condensed">
+                                                    <thead>
+                                                        <tr style="background:#F4F6FA;">
+                                                            <th style="padding-left:14px">用例名称</th>
+                                                            <th>步骤数</th>
+                                                            <th>状态</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="d_c_l">
+                                                        <tr>
+                                                            <td>
+                                                                <a onclick="showDeviceDetail()">
+                                                                    测试用例1
+                                                                </a>
+                                                            </td>
+                                                            <td>10</td>
+                                                            <td>False</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div style="display: none;">
+                                            <!-- 测试性能 -->
+                                            <div>
+                                                <div>
+                                                    <canvas id="device_xn_test" width="400" height="200"></canvas>
+                                                </div>
+                                                <div>
+                                                    <canvas id="device_xn_test2" width="400" height="200"></canvas>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div style="display: none;">
+                                            <!--log -->
+                                            <table class="table table-condensed" style="border-collapse: collapse;">
+                                                <thead style="display:block;">
+                                                    <tr style="background:#E9EFF4;">
+                                                        <th style="width:90px; padding-left: 15px">时间</th>
+                                                        <th style="width:55px; padding-left: 18px">PID</th>
+                                                        <th style="width:50px; padding-left: 10px">level</th>
+                                                        <th style="width:155px; padding-left: 30px">Tag</th>
+                                                        <th style="width:453px; padding-left: 45px">text</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody style="height: 500px;overflow-y: scroll; display:block;width:853px;margin-top:-2px;"
+                                                    id="logList">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="information_details" id="case_details_section" style="display: none;">
+                            <!-- 左半部分菜单栏 -->
+                            <div class="test_result_lt">
+                                <h6><b>用例列表</b></h6>
+                                <ul class="result_list navgation" id="action_device_list">
+                                </ul>
+                            </div>
+
+                            <!-- 用例动作列表-->
+                            <div class="case_action_list">
+                                <table class="table table-condensed result_table">
+                                    <thead>
+                                        <tr style="background:#E9EFF4;">
+                                            <th>设备名</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="action_device_title">
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <li class="result_list_box" id="action_list">
+                                    <!-- <ul class="small_list" style="max-height: 260px; overflow-y: auto;">
+                                        <li style="cursor:pointer;" onclick="showDeviceDetail('SWEYUWLZAAROQCUK')">
+                                            <span class="error">测试用例1</span></li>
+                                    </ul>
+                                    <ul class="small_list" style="max-height: 260px; overflow-y: auto;">
+                                        <li style="cursor:pointer;" onclick="showDeviceDetail('SWEYUWLZAAROQCUK')">
+                                            <span class="success">测试用例2</span></li>
+                                    </ul> -->
+                                </li>
+                            </div>
+
+                            <!-- 动作详情-->
+                            <div class="action_detail" id="action_board">
+                                <!-- <div id="title_board"></div>
+                                <div id="page_board"></div>
+                                <div id="normal_board"></div>
+                                <div id="error_board"></div> -->
+                            </div>
+
+                        </section>
+                        <section class="information_details" id="xinneng_details_section" style="display: none;">
+                            <div class="performance_box">
+                                <p><b>性能概括</b></p>
+                                <ul style="margin-left:30px;" class="ul_box1">
+                                    <li>
+                                        <p>
+                                            30.8s
+                                        </p>
+                                        <p>安装时间</p>
+                                    </li>
+                                    <li>
+                                        <span class="sp_l">安装最快</span>
+                                        <span class="sp_c">
+                                            Pixel
+                                        </span>
+                                        <span class="sp_r">
+                                            5.64s
+                                        </span>
+                                    </li>
+                                    <li>
+                                        <span class="sp_l">安装最慢</span>
+                                        <span class="sp_c">
+                                            Galaxy Note3
+                                        </span>
+                                        <span class="sp_r sp_r2">
+                                            140.06s
+                                        </span>
+                                    </li>
+                                </ul>
+                                <ul class="ul_box1 ul_box2">
+                                    <li>
+                                        <p>
+                                            3.92s
+                                        </p>
+                                        <p>启动时间</p>
+                                    </li>
+                                    <li>
+                                        <span class="sp_l">启动最快</span>
+                                        <span class="sp_c">
+                                            华为 P20
+                                        </span>
+                                        <span class="sp_r">
+                                            0.07s
+                                        </span>
+                                    </li>
+                                    <li>
+                                        <span class="sp_l">启动最慢</span>
+                                        <span class="sp_c">
+                                            vivo Y35
+                                        </span>
+                                        <span class="sp_r sp_r2">
+                                            14.48s
+                                        </span>
+                                    </li>
+                                </ul>
+                                <ul class="ul_box1 ul_box3">
+                                    <li>
+                                        <p>
+                                            11.57%
+                                        </p>
+                                        <p>CPU占用</p>
+                                    </li>
+                                    <li>
+                                        <span class="sp_l">CPU占用最少</span>
+                                        <span class="sp_c">
+                                            vivo Y71（全网通）
+                                        </span>
+                                        <span class="sp_r">
+                                            1.0%
+                                        </span>
+                                    </li>
+                                    <li>
+                                        <span class="sp_l">CPU占用最多</span>
+                                        <span class="sp_c">
+                                            一加 3
+                                        </span>
+                                        <span class="sp_r sp_r2">
+                                            36.12%
+                                        </span>
+                                    </li>
+                                </ul>
+                                <ul class="ul_box1 ul_box4">
+                                    <li>
+                                        <p>
+                                            203.85MB
+                                        </p>
+                                        <p>内存占用</p>
+                                    </li>
+                                    <li>
+                                        <span class="sp_l">内存占用最少</span>
+                                        <span class="sp_c">
+                                            华为 荣耀畅玩4C
+                                        </span>
+                                        <span class="sp_r">
+                                            3.24MB
+                                        </span>
+                                    </li>
+                                    <li>
+                                        <span class="sp_l">内存占用最多</span>
+                                        <span class="sp_c">
+                                            乐视 乐1 Pro
+                                        </span>
+                                        <span class="sp_r sp_r2">
+                                            453.29MB
+                                        </span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="data_box">
+                                <p><span>|</span><b>终端数据</b></p>
+                                <table class="table table-condensed" style="background:#fff;">
+                                    <thead>
+                                        <tr style="background:#E9EFF4;">
+                                            <th style="padding-left:10px">设备名称</th>
+                                            <th style="padding-left:10px">设备类型</th>
+                                            <th>安装耗时(s）</th>
+                                            <th>启动耗时(s）</th>
+                                            <th>平均CPU(%）</th>
+                                            <th>平均内存(MB)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pagination_data">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script type="text/javascript">
+    // json_string = json_string.replace(/\\/g, "\/");
+
+    $(function () {
+        //初始化 首页内容
+        let [al, av, dn, fs, tt] = get_apk_info()
+        $("#apk_label").text(al);
+        $("#apk_version").text(av);
+        $("#device_num").text(dn);
+        $("#file_size").text(fs);
+        $("#test_time").text(tt);
+
+        测试概况();
+        终端详情_设备列表();
+        let d = get_first_device_name();
+        show_设备信息_(d);
+        show_用例详情(d, 0);
+        show_性能详情_性能概括();
+        show_性能详情_终端数据();
+    })
+
+
+
+    $(function () {
+        // table 切换
+        let button_list = $("#menu_title li");
+        let section_list = $("section");
+
+        for (let i = 0; i < button_list.length; i++) {
+            let button = button_list[i];
+            button.index = i;
+
+            $(button).on("click", function () {
+                for (let j in section_list) {
+                    let section = section_list[j];
+                    let button_ = button_list[j];
+
+                    $(button_).attr("class", "");
+                    $(section).css("display", "none");
+
+                    $(section_list[this.index]).css("display", "block");
+                    $(this).attr("class", "on")
+                }
+            });
+        }
+    })
+
+    $(function () {
+        // table 切换
+        let button_list = $("#Equipment_information_list li");
+        let section_list = $("#device_show>div");
+
+        for (let i in button_list) {
+            let button = button_list[i];
+            button.index = i;
+
+            $(button).on("click", function () {
+                for (let j in section_list) {
+                    let section = $(section_list[i]);
+                    let button_ = $(button_list[i]);
+
+                    button_.attr("class", "");
+                    section.css("display", "none");
+
+                    $(section_list[this.index]).css("display", "block");
+                    $(this).attr("class", "active")
+                }
+            });
+        }
+
+        // $($("#menu_title li")[1]).trigger("click");
+    })
+
+
+    function 测试概况() {
+        show_测试结果();
+        show_测试终端列表();
+    }
+
+    function show_测试终端列表() {
+        //插入测试概况的设备列表
+        for (let i in report_json.device_list) {
+            device = report_json.device_list[i];
+            let l = get_device_info(device.device_name);
+            $("#device_list").append(
+                `
+            <tr>
+                <td><a onclick="show_设备信息('${l[0]}')">
+                    ${l[0]}
+                    </a>
+                </td>
+                <td>${l[1]}</td>
+                <td>${l[2]}</td>
+                <td>${l[3]}</td>
+                <td class="${l[4]}">${l[4]}</td>
+                <td class="${l[5]}">${l[5]}</td>
+                <td class="${l[6]}">${l[6]}</td>
+                <td class="√">${l[7]}</td>
+                <td class="×">${l[8]}</td>
+            </tr>
+            `
+            );
+        }
+    }
+
+    function show_设备信息(device_name) {
+        $($("#menu_title li")[1]).trigger("click");
+        show_设备信息_(device_name);
+    }
+
+    function show_设备信息_(device_name) {
+        show_终端详情_设备信息(device_name);
+        show_终端详情_测试结果(device_name);
+        show_终端详情_用例列表(device_name);
+        show_终端详情_性能信息(device_name);
+        show_终端详情_log(device_name)
+        get_设备平均性能(device_name)
+    }
+
+    function show_终端详情_设备信息(device_name) {
+        let [a, b, c, d] = get_device_info_(device_name);
+        $("#detailDevice").html(
+            `
+        <tr>
+            <td>${a}</td>
+            <td>android</td>
+            <td>${b}</td>
+            <td>${d}</td>
+        </tr>
+        `
+        );
+    };
+
+
+
+    function show_终端详情_测试结果(device_name) {
+        show_终端详情_测试结果_安装(device_name)
+        show_终端详情_测试结果_启动(device_name)
+        show_终端详情_测试结果_运行(device_name)
+    };
+
+
+    function show_测试结果() {
+        let [ss, sf, inf, ins, stf, sts] = get_main_test_info();
+
+        // $("#ssp").css("width", (sp) + "px")
+        // $("#ss").text(ss)
+
+        // $("#ffp").css("width", (fp) + "px")
+        // $("#sf").text(sf)
+
+        // $("#inp").css("width", (inp) + "px")
+        // $("#inf").text(inf)
+
+        // $("#stp").css("width", (stp) + "px")
+        // $("#stf").text(stf)
+
+        new Chart(document.getElementById("test_test"), {
+            "type": "doughnut",
+            "data": {
+                "labels": ["通过", "失败"],
+                "datasets": [{
+                    "label": "设备执行状态",
+                    "data": [ss, sf],
+                    "backgroundColor": ["rgb(54, 162, 235)", "rgb(255, 99, 132)"]
+                }]
+            }
+        });
+
+        new Chart(document.getElementById("test_test2"), {
+            "type": "doughnut",
+            "data": {
+                "labels": ["安装成功", "安装失败"],
+                "datasets": [{
+                    "label": "设备执行状态",
+                    "data": [ins, inf],
+                    "backgroundColor": ["rgb(75, 192, 192)", "rgb(255, 205, 86)"]
+                }]
+            }
+        });
+
+        new Chart(document.getElementById("test_test3"), {
+            "type": "doughnut",
+            "data": {
+                "labels": ["启动成功", "启动失败"],
+                "datasets": [{
+                    "label": "设备执行状态",
+                    "data": [sts, stf],
+                    "backgroundColor": ["rgb(153, 102, 255)", "rgb(201, 203, 207)"]
+                }]
+            }
+        });
+    }
+
+    function show_用例详情(device_name, index) {
+        $($("#menu_title li")[2]).trigger("click");
+        show_用例列表(device_name);
+        show_用例列表_操作列表(device_name, 0);
+    }
+</script>
+
+</html>
